@@ -95,7 +95,6 @@
     </el-row>
 
     <el-table v-loading="loading" :data="infoList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="45" align="center" />
       <el-table-column label="优惠券名称" align="center" prop="couponName" />
       <el-table-column label="优惠券类型" align="center" prop="couponType">
         <template slot-scope="scope">

@@ -135,7 +135,7 @@
           <el-button
             size="mini"
             type="text"
-            v-if="scope.row.approveStatus === '1' || scope.row.status === '1' "
+            v-if="(scope.row.approveStatus === '1' && scope.row.status === '1') || (scope.row.approveStatus === '1' && scope.row.status === '0') || (scope.row.approveStatus === '1' && scope.row.status === '3') "
             @click="handleGrant(scope.row)"
             v-hasPermi="['activity:activity:grant']"
           >发放</el-button>
