@@ -37,6 +37,18 @@
               <el-input v-model="form.couponName" autocomplete="off" disabled />
             </el-form-item>
           </el-col>
+          <el-col :span="12">
+            <el-form-item label="优惠券渠道" prop="channel">
+              <el-select v-model="form.channelType" disabled size="small">
+                <el-option
+                  v-for="dict in dict.type.channel_type"
+                  :key="dict.value"
+                  :label="dict.label"
+                  :value="dict.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
@@ -196,7 +208,7 @@
   export default {
     name: "couponDetail",
     props: ["dialogFormVisible", "detailInfo"],
-    dicts: ['business_type', 'coupon_type', 'ver_channel', 'pay_type'],
+    dicts: ['business_type', 'coupon_type', 'ver_channel', 'pay_type', 'channel_type'],
     data() {
       return {
         form:{},

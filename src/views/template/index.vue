@@ -216,6 +216,18 @@
               <el-input v-model="form.couponName" placeholder="请输入优惠券名称" />
             </el-form-item>
           </el-col>
+          <el-col :span="12">
+            <el-form-item label="优惠券渠道" prop="channelType">
+              <el-select v-model="form.channelType" placeholder="请选择优惠券渠道" size="small">
+                <el-option
+                  v-for="dict in dict.type.channel_type"
+                  :key="dict.value"
+                  :label="dict.label"
+                  :value="dict.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
@@ -393,7 +405,7 @@ import detailsPop from './components/couponDetail'
 
 export default {
   name: "temp",
-  dicts: ['business_type', 'coupon_type', 'ver_channel', 'pay_type'],
+  dicts: ['business_type', 'coupon_type', 'ver_channel', 'pay_type', 'channel_type'],
   components:{
     uploadFile,
     detailsPop,
@@ -566,6 +578,7 @@ export default {
         personLimit: null,
         dateLimit: null,
         machineLimit: null,
+        channelType: null,
       };
       this.resetForm("form");
     },

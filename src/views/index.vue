@@ -12,10 +12,11 @@
               type="daterange"
               unlink-panels
               range-separator="至"
-              start-placeholder="开始月份"
-              end-placeholder="结束月份"
+              start-placeholder="开始时间"
+              end-placeholder="结束时间"
               v-model="dateRange"
               clearable
+              @change="getSummaryData"
             >
             </el-date-picker>
           </el-form-item>
@@ -86,8 +87,8 @@
           type="daterange"
           unlink-panels
           range-separator="至"
-          start-placeholder="开始月份"
-          end-placeholder="结束月份"
+          start-placeholder="开始时间"
+          end-placeholder="结束时间"
           v-model="activityDateRange"
           clearable
         >
@@ -106,14 +107,14 @@
       <el-table-column label="关联活动名称" align="center" prop="activityName"/>
       <el-table-column label="活动总预算（元）" align="center" prop="budget" />
       <el-table-column label="发放券数量" align="center" prop="sendCouponNum" />
-      <el-table-column label="领取率" align="center" prop="receiveRate" />
-      <el-table-column label="使用率" align="center" prop="useRate" />
-      <el-table-column label="优惠总金额" align="center" prop="orderAmount" />
-      <el-table-column label="交易总金额" align="center" prop="orderAmount" />
-      <el-table-column label="用券总单量" align="center" prop="orderAmount" />
-      <el-table-column label="用券笔单价" align="center" prop="orderAmount" />
-      <el-table-column label="拉新数" align="center" prop="orderAmount" />
-      <el-table-column label="使用数" align="center" prop="orderAmount" />
+      <el-table-column label="领取率（%）" align="center" prop="receiveRate" />
+      <el-table-column label="使用率（%）" align="center" prop="useRate" />
+      <el-table-column label="优惠总金额（元）" align="center" prop="disAmount" />
+      <el-table-column label="交易总金额（元）" align="center" prop="orderAmount" />
+      <el-table-column label="用券总单量" align="center" prop="orderNum" />
+      <el-table-column label="用券笔单价（元）" align="center" prop="orderPrice" />
+      <el-table-column label="拉新数" align="center" prop="newNum" />
+      <el-table-column label="使用数" align="center" prop="useNum" />
     </el-table>
 
     <pagination

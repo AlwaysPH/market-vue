@@ -438,6 +438,7 @@
           <el-table-column label="APP账号" align="center" prop="appAccount"/>
           <el-table-column label="企业客户名称" align="center" prop="companyUserName" />
           <el-table-column label="卡面名称" align="center" prop="cardFaceName" />
+          <el-table-column label="手机号" align="center" prop="phoneNumber" />
           <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
             <template slot-scope="scope">
               <el-button
