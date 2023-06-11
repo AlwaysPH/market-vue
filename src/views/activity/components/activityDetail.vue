@@ -46,6 +46,13 @@
             </el-row>
             <el-row>
               <el-col :span="12">
+                <el-form-item label="活动简介" prop="intro">
+                  <el-input type="textarea" :row="4" v-model="form.intro" autocomplete="off" disabled />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="12">
                 <el-form-item label="活动区域范围" prop="regionName">
                   <el-input
                     v-model="form.regionName"
@@ -233,6 +240,27 @@
               </el-col>
             </el-row>
             <el-row>
+              <el-form-item label="发券时间" prop="grantType"></el-form-item>
+            </el-row>
+            <el-row>
+              <el-col :span="15">
+                <el-form-item>
+                  <el-date-picker
+                    v-model="form.grantStartTime"
+                    type="datetime"
+                    format="yyyy-MM-dd HH:mm:ss"
+                    disabled>
+                  </el-date-picker>至
+                  <el-date-picker
+                    v-model="form.grantEndTime"
+                    type="datetime"
+                    format="yyyy-MM-dd HH:mm:ss"
+                    disabled>
+                  </el-date-picker>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row>
               <el-form-item label="券使用有效期" prop="effectType"></el-form-item>
             </el-row>
             <el-row>
@@ -243,13 +271,13 @@
                     v-model="form.effectStartTime"
                     type="datetime"
                     format="yyyy-MM-dd HH:mm:ss"
-                    placeholder="选择日期时间"  disabled>
+                    disabled>
                   </el-date-picker>至
                   <el-date-picker
                     v-model="form.effectEndTime"
                     type="datetime"
                     format="yyyy-MM-dd HH:mm:ss"
-                    placeholder="选择日期时间"  disabled>
+                    disabled>
                   </el-date-picker>
                 </el-form-item>
               </el-col>
@@ -344,21 +372,20 @@
               </el-table-column>
               <el-table-column label="行业类型" align="center" prop="industryType" >
                 <template slot-scope="scope">
-                  <span v-if="scope.row.industryType === '0'">大型商场</span>
-                  <span v-else-if="scope.row.industryType === '1'">大型超市</span>
-                  <span v-else-if="scope.row.industryType === '2'">娱乐</span>
-                  <span v-else-if="scope.row.industryType === '3'">影院</span>
-                  <span v-else-if="scope.row.industryType === '4'">连锁便利店</span>
+                  <span v-if="scope.row.industryType === '5621'">大型商场</span>
+                  <span v-else-if="scope.row.industryType === '5998'">大型超市</span>
+                  <span v-else-if="scope.row.industryType === '7408'">娱乐</span>
+                  <span v-else-if="scope.row.industryType === '7991'">旅游</span>
+                  <span v-else-if="scope.row.industryType === '5999'">连锁便利店</span>
+                  <span v-else-if="scope.row.industryType === '7430'">其他</span>
                 </template>
               </el-table-column>
-              <el-table-column label="已参与活动数量" align="center" prop="activityNum" />
               <el-table-column label="本次活动营销资金结算方式" align="center" prop="settleType" >
                 <template slot-scope="scope">
                   <span v-if="scope.row.settleType === '0'">足额结算</span>
                   <span v-else-if="scope.row.settleType === '1'">差额预存</span>
                 </template>
               </el-table-column>
-              <el-table-column label="商户原消费费率" align="center" prop="consumRate"/>
               <el-table-column label="活动期间商户消费费率" align="center" prop="activityConsumRate"/>
             </el-table>
           </el-collapse-item>
@@ -418,7 +445,7 @@
         this.$emit("cancel");
       },
       review(file) {
-        let url = 'http://120.79.140.167:8089/files' + file;
+        let url = 'http://106.14.63.214:8990/files' + file;
         window.open(url, "_blank");
       },
     },

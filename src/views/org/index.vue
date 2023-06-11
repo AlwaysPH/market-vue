@@ -686,10 +686,16 @@ export default {
       this.$refs["form"].validate(valid => {
         if (valid) {
           if (this.form.id != null) {
+            this.form.licenseTime = this.filterTime(this.form.licenseTime)
             updateOrg(this.form).then(response => {
               this.$message.success("修改成功");
               this.open = false;
+              this.itemPics.fileList = []
+              this.$refs.licensePhoto.fileList = []
               this.getList();
+            }).catch(() => {
+              this.itemPics.fileList = []
+              this.$refs.licensePhoto.fileList = []
             });
           } else {
             this.form.licensePhoto = this.itemPics.fileList.join(',')
@@ -697,14 +703,36 @@ export default {
               this.$message.warning("营业执照照片不能为空")
               return
             }
+            this.form.licenseTime = this.filterTime(this.form.licenseTime)
             addOrg(this.form).then(response => {
               this.$message.success("新增成功");
               this.open = false;
+              this.itemPics.fileList = []
+              this.$refs.licensePhoto.fileList = []
               this.getList();
+            }).catch(() => {
+              this.itemPics.fileList = []
+              this.$refs.licensePhoto.fileList = []
             });
           }
         }
       });
+    },
+    //格式化时间
+    filterTime(e){
+      let date = new Date(e);
+      let y = date.getFullYear();
+      let m = date.getMonth() + 1;
+      m = m < 10 ? "0" + m : m;
+      let d = date.getDate();
+      d = d < 10 ? "0" + d : d;
+      let h = date.getHours();
+      h = h < 10 ? "0" + h : h;
+      let minute = date.getMinutes();
+      minute = minute < 10 ? "0" + minute : minute;
+      let s = date.getSeconds();
+      s = s < 10 ? "0" + s : s;
+      return y + "-" + m + "-" + d + " " + h + ":" + minute + ":" + s;
     },
     /** 删除按钮操作 */
     handleDelete(row) {
@@ -728,7 +756,7 @@ export default {
     },
     review(file) {
       // let url = process.env.VUE_APP_BASE_API + file;
-      let url = 'http://120.79.140.167:8089/files' + file;
+      let url = 'http://106.14.63.214:8990/files' + file;
       window.open(url, "_blank");
     },
     getItemPic(e, type) {

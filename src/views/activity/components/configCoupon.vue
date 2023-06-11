@@ -6,8 +6,9 @@
       :before-close="handleClose"
       :visible.sync="dialogFormVisible"
       :close-on-click-modal="false"
+      append-to-body
     >
-    <el-form :model="form" :rules="rules" :inline="true" label-width="250px">
+    <el-form @submit.prevent :model="form" :rules="rules" :inline="true" label-width="250px">
       <el-row>
         <el-col :span="12">
           <el-form-item>
@@ -20,7 +21,7 @@
         <el-col :span="22">
           <el-collapse v-model="activeName" accordion>
             <el-collapse-item title="已选优惠券信息" name="1">
-              <el-table :data="infoList">
+              <el-table :data="contactList">
                 <el-table-column label="id" v-if="false" align="center" prop="id" />
                 <el-table-column label="优惠券名称" align="center" prop="couponName" />
                 <el-table-column label="优惠券类型" align="center" prop="couponType">
@@ -72,6 +73,27 @@
         </el-col>
       </el-row>
       <el-row>
+        <el-form-item label="发券时间" prop="grantType"></el-form-item>
+      </el-row>
+      <el-row>
+        <el-col :span="12" style="margin-left: 20%">
+          <el-form-item>
+            <el-date-picker
+              v-model="form.grantStartTime"
+              type="datetime"
+              format="yyyy-MM-dd HH:mm:ss"
+              placeholder="选择发券开始时间">
+            </el-date-picker>至
+            <el-date-picker
+              v-model="form.grantEndTime"
+              type="datetime"
+              format="yyyy-MM-dd HH:mm:ss"
+              placeholder="选择发券结束时间">
+            </el-date-picker>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
         <el-form-item label="券使用有效期" prop="effectType"></el-form-item>
       </el-row>
       <el-row>
@@ -82,13 +104,13 @@
               v-model="form.effectStartTime"
               type="datetime"
               format="yyyy-MM-dd HH:mm:ss"
-              placeholder="选择日期时间">
+              placeholder="选择开始时间">
             </el-date-picker>至
             <el-date-picker
               v-model="form.effectEndTime"
               type="datetime"
               format="yyyy-MM-dd HH:mm:ss"
-              placeholder="选择日期时间">
+              placeholder="选择结束时间">
             </el-date-picker>
           </el-form-item>
         </el-col>
@@ -236,11 +258,11 @@
               <el-input type="number" v-model="couponForm.grantNum" disabled />
             </el-form-item>
           </el-col>
-          <el-col :span="10">
-            <el-form-item label="原剩余库存" prop="surplus" label-width="180px">
-              <el-input type="number" v-model="couponForm.surplus" disabled />
-            </el-form-item>
-          </el-col>
+<!--          <el-col :span="10">-->
+<!--            <el-form-item label="原剩余库存" prop="surplus" label-width="180px">-->
+<!--              <el-input type="number" v-model="couponForm.surplus" disabled />-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
         </el-row>
 <!--        <el-row>-->
 <!--          <el-col :span="10">-->
@@ -282,9 +304,11 @@
           activityId : null,
           takeDateNum:null,
           effectDateNum:null,
-          sameActivityFlag:null,
-          diffActivityFlag:null,
-          outActivityFlag: null,
+          sameActivityFlag:0,
+          diffActivityFlag:0,
+          outActivityFlag: 0,
+          grantStartTime: null,
+          grantEndTime: null,
           effectStartTime: null,
           effectEndTime: null,
           effectType: null,
@@ -295,9 +319,10 @@
           receiveType: null,
           infoList: [],
           userList: [],
+          isEdit : '0',
         },
         //已选优惠券列表
-        infoList:[],
+        contactList:[],
         //是否显示添加用户按钮
         showUserAdd: false,
         userList: [],
@@ -313,6 +338,9 @@
           ],
           effectType: [
             { required: true, message: "券使用有效期不能为空", trigger: "blur" }
+          ],
+          grantType:[
+            { required: true, message: "发券时间不能为空", trigger: "blur" }
           ],
           alarmNum: [
             { required: true, message: "剩余库存预警不能为空", trigger: "blur" }
@@ -355,6 +383,7 @@
         open: false,
         title: null,
         editFlag: false,
+        isEdit : '0',
         couponRules:{
           inventoryNum: [
             { required: true, message: "库存数量不能为空", trigger: "blur" }
@@ -368,7 +397,8 @@
           if(this.couponInfo){
             this.form = newName
             this.activityId =this.couponInfo.id
-            this.infoList = this.couponInfo.contactList
+            this.contactList = this.couponInfo.contactList || []
+            this.isEdit = this.couponInfo.isEdit
           }
         },
         immediate: true,
@@ -383,6 +413,8 @@
           sameActivityFlag:'0',
           diffActivityFlag:'0',
           outActivityFlag: '0',
+          grantStartTime: null,
+          grantEndTime: null,
           effectStartTime: null,
           effectEndTime: null,
           effectType: null,
@@ -391,13 +423,23 @@
           alarmPhone: null,
           alarmEmail: null,
           receiveType: null,
+          infoList : [],
         };
-        this.infoList = []
+        this.contactList = []
         this.resetForm("form");
       },
       handleClose(){
         this.reset()
         this.$emit("cancel");
+      },
+      handleOpenDialog(){
+        if(this.couponInfo){
+          this.activityId = this.couponInfo.id
+          this.contactList = this.couponInfo.contactList || []
+          this.form.sameActivityFlag = '0'
+          this.form.diffActivityFlag = '0'
+          this.form.outActivityFlag = '0'
+        }
       },
       //新增券
       addCoupon(){
@@ -412,7 +454,7 @@
       },
       //提交
       confirm(){
-        if(this.infoList.length <= 0){
+        if(this.contactList.length <= 0){
           this.$message.warning("请选择需要关联的优惠券")
           return
         }
@@ -422,28 +464,47 @@
         //     return
         //   }
         // }
+        if(new Date(this.form.grantStartTime) > new Date(this.form.grantEndTime)){
+          this.$message.warning("发券开始日期不能大于结束日期")
+          return
+        }
+        if(!this.form.alarmContent){
+          this.$message.warning("预警内容不能为空")
+          return
+        }
+        this.form.grantStartTime = this.filterTime(this.form.grantStartTime)
+        this.form.grantEndTime = this.filterTime(this.form.grantEndTime)
         if(this.form.effectType === '0'){
           if(!this.form.effectStartTime || !this.form.effectEndTime){
             this.$message.warning("请选择固定失效日期")
             return
           }
+          if(new Date(this.form.effectStartTime) > new Date(this.form.effectEndTime)){
+            this.$message.warning("开始日期不能大于结束日期")
+            return
+          }
+          this.form.effectStartTime = this.filterTime(this.form.effectStartTime)
+          this.form.effectEndTime = this.filterTime(this.form.effectEndTime)
         }else if(this.form.effectType === '1'){
           if(!this.form.effectDateNum || !this.form.takeDateNum){
             this.$message.warning("请填写失效日期")
             return
           }
         }
-        this.form.infoList = this.infoList
+
+        this.form.infoList = this.contactList
         // this.form.userList = this.userList
         this.form.activityId = this.activityId
+        this.form.isEdit = this.isEdit
         this.$emit("check",this.form)
         this.reset()
       },
       //选择优惠券类型加载优惠券列表
       firstChange(){
         let couponType = this.couponForm.couponType
+        let activityId = this.couponInfo.id
         if(couponType){
-          getCouponDetailList({couponType: couponType}).then(res => {
+          getCouponDetailList({couponType: couponType, activityId: activityId}).then(res => {
             this.couponNameList = res.data
           })
         }
@@ -474,18 +535,21 @@
       couponConfirm(e){
         let data = {}
         let flag = false
-        if(this.infoList.length > 0){
-          this.infoList.forEach(data => {
-            if(data.id === this.couponForm.couponId){
-              data.couponAmount = this.couponForm.couponAmount
-              data.inventoryNum = this.couponForm.inventoryNum
-              data.grantNum = this.couponForm.grantNum
-              data.surplus = this.couponForm.surplus
-              // data.nowGrantNum = this.couponForm.nowGrantNum
-              data.nowSurplus = this.couponForm.nowSurplus
-              flag = true
-            }
-          })
+        let couponData = this.couponForm
+        if(this.contactList){
+          if(this.contactList.length > 0){
+            this.contactList.forEach(data => {
+              if(data.couponId === couponData.couponId){
+                data.couponAmount = couponData.couponAmount
+                data.inventoryNum = couponData.inventoryNum
+                data.grantNum = couponData.grantNum
+                data.surplus = couponData.surplus
+                // data.nowGrantNum = this.couponForm.nowGrantNum
+                data.nowSurplus = couponData.nowSurplus
+                flag = true
+              }
+            })
+          }
         }
         if(!flag){
           data['id'] = this.couponForm.couponId
@@ -499,7 +563,8 @@
           data['surplus'] = this.couponForm.surplus
           // data['nowGrantNum'] = this.couponForm.nowGrantNum
           // data['nowSurplus'] = this.couponForm.nowSurplus
-          this.infoList.push(data)
+          this.contactList.push(data)
+          this.couponInfo.contactList = this.contactList
         }
         this.couponCancel()
       },
@@ -518,6 +583,8 @@
         this.couponForm.inventoryNum = null
         this.couponForm.grantNum = null
         this.couponForm.surplus = null
+        this.couponNameList = []
+        this.couponForm.couponId = null
         // this.couponForm.nowGrantNum = null
         // this.couponForm.nowSurplus = null
       },
@@ -540,11 +607,27 @@
       },
       //删除已关联优惠券
       handleDelete(e){
-        let index = this.infoList.indexOf(e)
+        let index = this.contactList.indexOf(e)
         if(index !== -1){
-          this.infoList.splice(index, 1)
+          this.contactList.splice(index, 1)
         }
-      }
+      },
+      //格式化时间
+      filterTime(e){
+        let date = new Date(e);
+        let y = date.getFullYear();
+        let m = date.getMonth() + 1;
+        m = m < 10 ? "0" + m : m;
+        let d = date.getDate();
+        d = d < 10 ? "0" + d : d;
+        let h = date.getHours();
+        h = h < 10 ? "0" + h : h;
+        let minute = date.getMinutes();
+        minute = minute < 10 ? "0" + minute : minute;
+        let s = date.getSeconds();
+        s = s < 10 ? "0" + s : s;
+        return y + "-" + m + "-" + d + " " + h + ":" + minute + ":" + s;
+      },
     }
   }
 </script>

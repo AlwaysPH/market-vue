@@ -240,6 +240,13 @@
         </el-row>
         <el-row>
           <el-col :span="12">
+            <el-form-item label="活动简介" prop="intro">
+              <el-input type="textarea" :row="4" v-model="form.intro" placeholder="请输入活动简介" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
             <el-form-item label="活动区域范围" prop="range">
               <el-cascader
                 size="large"
@@ -409,13 +416,18 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="卡属性名称" prop="cardName">
-              <el-input style="width: 200px;" disabled v-model="userInfo.cardName" />
+              <el-input style="width: 200px;" filterable disabled v-model="userInfo.cardName" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-button type="primary" @click="joinCard">加入</el-button>
           </el-col>
         </el-row>
+        <el-input style="display: none" v-model="userInfo.appUserId" />
+        <el-input style="display: none" v-model="userInfo.appAccount" />
+        <el-input style="display: none" v-model="userInfo.companyUserName" />
+        <el-input style="display: none" v-model="userInfo.cardFaceName" />
+        <el-input style="display: none" v-model="userInfo.phoneNumber" />
         <el-row :gutter="10" class="mb8">
           <el-col :span="1.5">
             <el-button
@@ -521,16 +533,17 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-table  :data="merchantList">
+        <el-table :data="merchantList">
           <el-table-column label="商户名称" align="center" prop="merchantName" />
           <el-table-column label="商户编号" align="center" prop="merchantNo"/>
           <el-table-column label="行业类型" align="center" prop="industryType">
             <template slot-scope="scope">
-              <span v-if="scope.row.industryType === '0'">大型商场</span>
-              <span v-else-if="scope.row.industryType === '1'">大型超市</span>
-              <span v-else-if="scope.row.industryType === '2'">娱乐</span>
-              <span v-else-if="scope.row.industryType === '3'">影院</span>
-              <span v-else-if="scope.row.industryType === '4'">连锁便利店</span>
+              <span v-if="scope.row.industryType === '5621'">大型商场</span>
+              <span v-else-if="scope.row.industryType === '5998'">大型超市</span>
+              <span v-else-if="scope.row.industryType === '7408'">娱乐</span>
+              <span v-else-if="scope.row.industryType === '7991'">旅游</span>
+              <span v-else-if="scope.row.industryType === '5999'">连锁便利店</span>
+              <span v-else-if="scope.row.industryType === '7430'">其他</span>
             </template>
           </el-table-column>
           <el-table-column label="本次活动营销资金结算方式" align="center" prop="settleType">
@@ -607,7 +620,7 @@
           </el-col>
           <el-col :span="10">
             <el-form-item label="商户名称" prop="merchantName" label-width="180px">
-              <el-select v-model="merchantForm.merchantName" :disabled="editFlag" placeholder="请选择商户名称" @change="merchantNameChange" clearable size="small">
+              <el-select v-model="merchantForm.merchantName" filterable :disabled="editFlag" placeholder="请选择商户名称" @change="merchantNameChange" clearable size="small">
                 <el-option
                   v-for="dict in merchantNameList"
                   :key="dict.id"
@@ -689,7 +702,8 @@
 
 <script>
 import { listInfo, getInfo, delInfo, addInfo, updateInfo, audit, submitAudit, submitCoupon,
-  specifyUser, grantCoupon, submitGrant, configMerchant, stopActivity, restartActivity } from "@/api/activity";
+  specifyUser, grantCoupon, submitGrant, configMerchant, stopActivity, restartActivity,
+  getCardUserInfo, getMerchantList, getConfigMerchant } from "@/api/activity";
 import { regionData,  CodeToText, TextToCode} from "element-china-area-data";
 import uploadFile from "../components/uploadFile";
 import detailsPop from "./components/activityDetail"
@@ -770,14 +784,16 @@ export default {
       userInfo: {
         cardNo: null,
         cardName: null,
+        appUserId: null,
+        appAccount: null,
+        companyUserName: null,
+        cardFaceName: null,
+        phoneNumber: null,
       },
-      cardInfo: null,
       cardList: [],
       //关联优惠券弹窗
       couponModel: false,
-      couponInfo: {
-        id : null,
-      },
+      couponInfo: null,
       //详情弹窗状态
       detailsModel: false,
       detailInfo:null,
@@ -849,6 +865,9 @@ export default {
         ],
         endTime: [
           { required: true, message: "结束时间不能为空", trigger: "blur" }
+        ],
+        intro:[
+          { required: true, message: "活动简介不能为空", trigger: "blur" }
         ],
         rangeName: [
           { required: true, message: "活动区域范围不能为空", trigger: "blur" }
@@ -990,6 +1009,7 @@ export default {
         regionName: null,
         regionCode : null,
         status: null,
+        intro: null,
       };
       this.resetForm("form");
     },
@@ -1047,6 +1067,10 @@ export default {
               return
             }
           }
+          if(!this.form.regionName){
+            this.$message.warning("活动区域范围不能为空")
+            return
+          }
           this.form.startTime = this.filterTime(this.form.startTime)
           this.form.endTime = this.filterTime(this.form.endTime)
           let region = this.form.regionName
@@ -1094,9 +1118,9 @@ export default {
               this.shrinkPics.fileList = []
               this.detailPics.fileList = []
               this.share.fileList = []
-              this.$refs.shrinkPics.fileList = []
-              this.$refs.detailPics.fileList = []
-              this.$refs.share.fileList = []
+              this.$refs.contractPhoto.fileList = []
+              this.$refs.detailPhoto.fileList = []
+              this.$refs.sharePhoto.fileList = []
               this.open = false;
               this.getList();
             });
@@ -1178,20 +1202,27 @@ export default {
     },
     //提交审核
     submitAudit(e){
-      submitAudit(e.id).then((res) => {
+      let data = {}
+      data['id'] = e.id
+      submitAudit(data).then((res) => {
         this.$message.success('提交成功')
         this.handleQuery();
       })
     },
     //配置优惠
     configCoupon(e){
-      this.couponModel = true;
       getInfo(e.id).then(res => {
         this.couponInfo = res.data
+        this.couponInfo.sameActivityFlag = '0'
+        this.couponInfo.diffActivityFlag = '0'
+        this.couponInfo.outActivityFlag = '0'
+        if(!this.couponInfo.contactList){
+          this.couponInfo.isEdit = '0'
+        }else {
+          this.couponInfo.isEdit = '1'
+        }
+        this.couponModel = true;
       })
-      this.couponInfo.sameActivityFlag = '0'
-      this.couponInfo.diffActivityFlag = '0'
-      this.couponInfo.outActivityFlag = '0'
     },
     // 取消配置优惠弹窗
     couponCancel() {
@@ -1200,16 +1231,12 @@ export default {
     //提交配置优惠
     couponConfirm(){
       let form = this.couponInfo;
+      form['activityId'] = form.activityId
       form['couponInfoList'] = form.infoList
-      form['cardInfoList'] = form.userList
-      submitCoupon(form).then((res) => {
-        if(res.code > 0){
-          this.$message.success('操作成功')
-          this.handleQuery();
-        }else {
-          this.$message.error(res.msg)
-        }
+      submitCoupon(form).then(res => {
+        this.$message.success('操作成功')
         this.couponModel = false;
+        this.handleQuery();
       })
     },
     //打开指定用户弹窗
@@ -1219,11 +1246,19 @@ export default {
     },
     //根据卡编号获取卡片信息
     cardNoChange(e){
-
+      getCardUserInfo(e).then(res => {
+        this.userInfo.cardNo = res.data.cardNo
+        this.userInfo.cardName = res.data.cardName
+        this.userInfo.appUserId = res.data.appUserId
+        this.userInfo.appAccount = res.data.appAccount
+        this.userInfo.companyUserName = res.data.companyUserName
+        this.userInfo.cardFaceName = res.data.cardFaceName
+        this.userInfo.phoneNumber = res.data.phoneNumber
+      });
     },
     //加入
     joinCard(){
-      let cardInfo = this.cardInfo
+      let cardInfo = this.userInfo
       if(cardInfo){
         this.cardList.push(cardInfo)
       }
@@ -1238,7 +1273,7 @@ export default {
     //取消指定用户
     cardCancel(){
       this.id = null
-      this.cardInfo = null
+      this.userInfo = {}
       this.cardList = []
       this.cardModel = false
     },
@@ -1340,7 +1375,16 @@ export default {
     //打开配置商户弹窗
     configMerchant(e){
       this.id = e.id
-      this.merchantModel = true
+      getConfigMerchant(e.id).then(res => {
+        this.merchantList = res.data
+        this.merchantModel = true
+      })
+    },
+    //选择行业类型加载商户
+    firstChange(type){
+      getMerchantList(type).then(res => {
+        this.merchantNameList = res.data
+      })
     },
     //修改商户名称
     merchantNameChange(e){
@@ -1380,6 +1424,7 @@ export default {
     //提交选择的商户
     merchantAddConfirm(){
       let flag = false
+      let data = {}
       if(this.merchantList.length > 0){
         this.merchantList.forEach(e => {
           if(e.merchantNo === this.merchantForm.merchantNo){
@@ -1390,20 +1435,26 @@ export default {
         })
       }
       if(!flag){
-        this.merchantList.push(this.merchantForm)
+        data['merchantNo'] = this.merchantForm.merchantNo.trim()
+        data['merchantName'] = this.merchantForm.merchantName.trim()
+        data['industryType'] = this.merchantForm.industryType.trim()
+        data['settleType'] = this.merchantForm.settleType.trim()
+        data['activityConsumRate'] = this.merchantForm.activityConsumRate.trim()
+        this.merchantList.push(data)
       }
       this.merchantOpen = false
       this.merchantForm.merchantNo = null
-      this.merchantForm.activityNum = null
-      this.merchantForm.consumRate = null
+      this.merchantForm.merchantName = null
       this.merchantForm.activityConsumRate = null
       this.merchantForm.effectStartTime = null
       this.merchantForm.effectEndTime = null
       this.merchantForm.settleType = null
+      this.merchantForm.industryType = null
+      this.merchantNameList = []
     },
     //删除选择的商户
     handleDeleteMerchant(e){
-      let index = this.infoList.indexOf(e)
+      let index = this.merchantList.indexOf(e)
       if(index !== -1){
         this.merchantList.splice(index, 1)
       }

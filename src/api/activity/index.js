@@ -141,6 +141,30 @@ export function restartActivity(data){
   })
 }
 
+//获取卡属性用户信息
+export function getCardUserInfo(data){
+  return request({
+    url: '/activity/getCardUserInfo/'+data,
+    method: 'get'
+  })
+}
+
+//获取商户列表
+export function getMerchantList(data){
+  return request({
+    url: '/activity/getMerchantList/'+data,
+    method: 'get'
+  })
+}
+
+//获取已配置的商户列表
+export function getConfigMerchant(data){
+  return request({
+    url: '/activity/getConfigMerchant/'+data,
+    method: 'get'
+  })
+}
+
 
 
 

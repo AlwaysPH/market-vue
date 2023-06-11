@@ -241,7 +241,7 @@
         this.$emit("cancel");
       },
       review(file) {
-        let url = 'http://120.79.140.167:8089/files' + file;
+        let url = 'http://106.14.63.214:8990/files' + file;
         window.open(url, "_blank");
       },
     },

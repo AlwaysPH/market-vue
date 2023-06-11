@@ -15,13 +15,12 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label="优惠券名称" prop="couponAdd">
+          <el-form-item label="优惠券名称" prop="couponName">
             <el-input
               v-model="queryParams.couponName"
               placeholder="请输入优惠券名称"
               clearable
               size="small"
-              @keyup.enter.native="handleQuery"
             />
           </el-form-item>
         </el-col>
@@ -32,7 +31,6 @@
               placeholder="请输入优惠券码"
               clearable
               size="small"
-              @keyup.enter.native="handleQuery"
             />
           </el-form-item>
         </el-col>
@@ -50,7 +48,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="7">
+        <el-col :span="9">
           <el-form-item label="创建时间" prop="createTime">
             <el-date-picker
               v-model="dateRange"
@@ -115,7 +113,7 @@
         <template slot-scope="scope">
           <el-button
             type="primary"
-            @click="review(form.couponPhoto)"
+            @click="review(scope.row.couponPhoto)"
             v-if="scope.row.couponPhoto"
           >点击查看
           </el-button
@@ -187,7 +185,7 @@
 
     <!-- 添加或修改优惠券信息对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="1200px" append-to-body :close-on-click-modal="false">
-      <el-form ref="form" :model="form" :rules="rules" label-width="150px">
+      <el-form @submit.prevent ref="form" :model="form" :rules="rules" label-width="150px">
         <el-row>
           <el-form-item label="基本信息"></el-form-item>
         </el-row>
@@ -483,6 +481,9 @@ export default {
       },
       // 表单校验
       rules: {
+        channelType: [
+          { required: true, message: "优惠券渠道不能为空", trigger: "blur" }
+        ],
         couponAdd: [
           { required: true, message: "优惠券系统内名称不能为空", trigger: "blur" }
         ],
@@ -590,6 +591,7 @@ export default {
     /** 重置按钮操作 */
     resetQuery() {
       this.resetForm("queryForm");
+      this.dateRange = []
       this.handleQuery();
     },
     // 多选框选中数据
@@ -812,7 +814,7 @@ export default {
       this.itemPics.fileList = arr;
     },
     review(file) {
-      let url = 'http://120.79.140.167:8089/files' + file;
+      let url = 'http://106.14.63.214:8990/files' + file;
       window.open(url, "_blank");
     },
     //阶梯满减薪资新增输入框

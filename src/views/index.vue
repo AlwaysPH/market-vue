@@ -1,11 +1,11 @@
 <template>
   <div class="app-container">
-    <el-form :model="dataParams" ref="queryForm" :inline="true" label-width="68px">
+    <el-form :model="dataParams" ref="queryForm" :inline="true" label-width="120px">
       <el-row>
-        <el-col :span="17">
+        <el-col :span="13">
           <el-form-item label="数据概况"/>
         </el-col>
-        <el-col :span="7">
+        <el-col :span="11">
           <el-form-item label="统计时间" prop="statisticsTime">
             <el-date-picker
               value-format="yyyy-MM-dd"
@@ -99,6 +99,18 @@
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
+    <el-row :gutter="10" class="mb8">
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-download"
+          size="mini"
+          :loading="exportLoading"
+          @click="handleExport"
+        >导出</el-button>
+      </el-col>
+    </el-row>
 
 
     <el-table v-loading="loading" :data="infoList">
@@ -204,13 +216,14 @@
       /** 重置按钮操作 */
       resetQuery() {
         this.resetForm("queryForm");
+        this.activityDateRange = []
         this.handleQuery();
       },
       /** 导出按钮操作 */
       handleExport() {
-        this.download('activity/export', {
+        this.download('index/export', {
           ...this.queryParams
-        }, `活动信息_${this.parseTime(new Date(), "{y}-{m}-{d}")}.xlsx`)
+        }, `优惠券使用详情列表_${this.parseTime(new Date(), "{y}-{m}-{d}")}.xlsx`)
       },
       //格式化时间
       filterTime(e) {

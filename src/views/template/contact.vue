@@ -61,6 +61,7 @@
           <span v-if="scope.row.approveStatus === '0'">待审核</span>
           <span v-else-if="scope.row.approveStatus === '1'">审核通过</span>
           <span v-else-if="scope.row.approveStatus === '2'">审核拒绝</span>
+          <span v-else-if="scope.row.approveStatus === '3'">待提交</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
